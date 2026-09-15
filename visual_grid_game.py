@@ -36,6 +36,15 @@ class VisualGridHuntGame:
                 self.opponents.append(op_pos)
 
         self.score = 0
+        # Sample available cells so trap placement always terminates.
+        trap_candidates = [
+            (x, y) for x in range(self.width) for y in range(self.height)
+            if (x, y) != (0, 0)
+            and (x, y) not in self.walls
+            and (x, y) not in self.food_positions
+            and [x, y] not in self.opponents
+        ]
+        self.toxic_traps = set(random.sample(trap_candidates, min(3, len(trap_candidates))))
         self.steps = 0
         self.collision = False
 
@@ -44,6 +53,7 @@ class VisualGridHuntGame:
             'agent_pos': list(self.agent_pos),
             'opponent_positions': [list(op) for op in self.opponents],
             'smells_food': tuple(self.agent_pos) in self.food_positions,
+            'smells_toxin': tuple(self.agent_pos) in self.toxic_traps,
             'hit_wall': tuple(self.agent_pos) in self.walls,
             'collision': self.collision,
             'score': self.score,
@@ -69,6 +79,9 @@ class VisualGridHuntGame:
             self.agent_pos = new_pos
 
         tuple_pos = tuple(self.agent_pos)
+        # Charge once per action ending on a trap, including staying there.
+        if tuple_pos in self.toxic_traps:
+            self.score -= 15
         if tuple_pos in self.food_positions:
             self.food_positions.remove(tuple_pos)
             self.score += 20
@@ -145,6 +158,15 @@ class GridGameGUI:
             y1 = (self.env.height - 1 - fy) * self.cell_size + offset
             self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="#f59e0b",
                                     outline="#d97706")
+
+        for tx, ty in self.env.toxic_traps:
+            cx = (tx + 0.5) * self.cell_size
+            cy = (self.env.height - ty - 0.5) * self.cell_size
+            radius = self.cell_size * 0.3
+            self.canvas.create_polygon(
+                cx, cy - radius, cx + radius, cy,
+                cx, cy + radius, cx - radius, cy,
+                fill="#9333ea", outline="#581c87")
 
         for ox, oy in self.env.opponents:
             offset = self.cell_size * 0.2
