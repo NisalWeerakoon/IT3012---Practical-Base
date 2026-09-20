@@ -1,6 +1,7 @@
 """Agent programs used by the SE3062 Intelligent Systems practicals."""
 
 import heapq
+import math
 import random
 from collections import deque
 
@@ -147,6 +148,41 @@ class SearchAgent:
                     heapq.heappush(frontier, (new_cost, neighbor, path + [action]))
         return None
 
+    def manhattan_distance(self, pos, goal):
+        return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+
+    def euclidean_distance(self, pos, goal):
+        return math.sqrt((pos[0] - goal[0]) ** 2 + (pos[1] - goal[1]) ** 2)
+
+    def astar_search(self, start_pos, goal_pos, walls, grid_size,
+                     heuristic_type="manhattan"):
+        start, goal = tuple(start_pos), tuple(goal_pos)
+        walls = set(map(tuple, walls))
+        heuristic = (self.euclidean_distance if heuristic_type == "euclidean"
+                     else self.manhattan_distance)
+        frontier = [(heuristic(start, goal), 0, start, [])]
+        reached_states = set()
+        best_cost = {start: 0}
+        while frontier:
+            _, cost, current, path = heapq.heappop(frontier)
+            if current == goal:
+                return path
+            if current in reached_states:
+                continue
+            reached_states.add(current)
+            for action, (dx, dy) in self.MOVES:
+                neighbor = (current[0] + dx, current[1] + dy)
+                new_cost = cost + 1
+                if (self._valid(neighbor, walls, grid_size)
+                        and neighbor not in reached_states
+                        and new_cost < best_cost.get(neighbor, float("inf"))):
+                    best_cost[neighbor] = new_cost
+                    heapq.heappush(frontier, (
+                        new_cost + heuristic(neighbor, goal), new_cost,
+                        neighbor, path + [action],
+                    ))
+        return None
+
     def sense_and_act(self, percept):
         if not self.plan:
             start = tuple(percept["agent_pos"])
@@ -158,6 +194,7 @@ class SearchAgent:
                 "BFS": self.bfs_search,
                 "DFS": self.dfs_search,
                 "UCS": self.ucs_search,
+                "AStar": self.astar_search,
             }.get(self.active_algo, self.bfs_search)
             self.plan = method(start, goal, percept["walls"], percept["grid_size"]) or []
         return self.plan.pop(0) if self.plan else "Stay"

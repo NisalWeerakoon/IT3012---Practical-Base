@@ -1,13 +1,14 @@
-# Intelligent Systems — Week 01
+# SE3062 Intelligent Systems Practicals
 
-Lab 01 extends the lecturer's master starter with toxic traps, a local toxin
-sensor, score penalties, and purple trap markers.
+Completed practical work through Lab 04.
 
-- Run: `python visual_grid_game.py` (Python 3 with Tkinter).
-- Verify: `python -m unittest test_lab01 -v`.
-- Written answers and implementation details: [LAB01.md](LAB01.md).
+- `Week_01`: PEAS analysis and toxic traps
+- `Week_02`: simple reflex and model-based agents
+- `Week_03`: BFS, DFS and UCS planning
+- `Week_04`: Manhattan/Euclidean heuristics and A* search
+
+Each weekly branch contains its implementation, written evaluation and PDF documentation.
+
+Run the latest tests with `python -m unittest test_lab01.py test_suite.py test_lab04.py`.
 
 Starter: https://github.com/SLIIT-FacultyOfComputing/IT3012---Practical-Base
-
-This branch covers Lab 01 only. The original multi-week test suite requires
-agent classes to be added in later practicals.
