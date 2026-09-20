@@ -1,7 +1,7 @@
 # visual_grid_game.py
 import random
 import tkinter as tk
-from agent import ModelBasedAgent
+from agent import SearchAgent
 
 
 class VisualGridHuntGame:
@@ -56,6 +56,10 @@ class VisualGridHuntGame:
         x, y = self.agent_pos
         return {
             'food_here': tuple(self.agent_pos) in self.food_positions,
+            'agent_pos': list(self.agent_pos),
+            'grid_size': (self.width, self.height),
+            'walls': list(self.walls),
+            'all_food': list(self.food_positions),
             'smells_toxin': tuple(self.agent_pos) in self.toxic_traps,
             'wall_ahead': self._is_blocked(x, y + 1),
             'wall_up': self._is_blocked(x, y + 1),
@@ -122,7 +126,7 @@ class GridGameGUI:
 
         self.env = VisualGridHuntGame(width=width, height=height, num_food=num_food, num_opponents=num_opponents,
                                       custom_walls=walls)
-        self.agent = agent or ModelBasedAgent()
+        self.agent = agent or SearchAgent()
 
         # Dynamically calculate cell size so the total canvas fits nicely within a 600x600 window ceiling
         max_canvas_dim = 600
